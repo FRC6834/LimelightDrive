@@ -107,37 +107,20 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-  
-    cam1.updateValues();
-    cam1.camDashDetails();
+    cam1.updateValues(); //updates Limelight values
+    cam1.camDashDetails(); //displays Limelight values to SmartDashboard
+    aimAndRange(); //updates steer + drive values to get in desired position relative to the target
 
-    aimAndRange();
+    boolean auto = controller.getAButton();
 
-        double steer = controller.getRightX();
-        double drive = controller.getLeftY();
-        boolean auto = controller.getAButton();
+    if (auto && cam1.hasTarget()){
+        drivetrain.arcadeDrive(m_LimelightDriveCommand,m_LimelightSteerCommand);
+    }
 
-        steer *= 0.70;
-        drive *= 0.70;
-
-        if (auto){
-          if (cam1.hasTarget())
-          {
-                drivetrain.arcadeDrive(m_LimelightDriveCommand,m_LimelightSteerCommand);
-          }
-          else
-          {
-                drivetrain.arcadeDrive(0.0,0.0);
-          }
-        }
-        else{
-          drivetrain.arcadeDrive(drive,steer);
-        }
-
-     //Curvature Drive  
-     double forwardSpeed = controller.getRightTriggerAxis();
-     double reverseSpeed = controller.getLeftTriggerAxis();
-     double turn = controller.getLeftX();
+    //Curvature Drive  
+    double forwardSpeed = controller.getRightTriggerAxis();
+    double reverseSpeed = controller.getLeftTriggerAxis();
+    double turn = controller.getLeftX();
      
      if (forwardSpeed > 0){
        drivetrain.curvatureDrive(speedCalc(forwardSpeed, true), turnCalc(turn, true));
@@ -188,12 +171,6 @@ public class Robot extends TimedRobot {
 
   //
   public void aimAndRange(){
-
-    if (cam1.hasTarget()){
-      m_LimelightDriveCommand = 0.0;
-      m_LimelightSteerCommand = 0.0;
-    }
-
     // Start with proportional steering
     double steer_cmd = cam1.getX() * STEER_K;
     m_LimelightSteerCommand = steer_cmd;
